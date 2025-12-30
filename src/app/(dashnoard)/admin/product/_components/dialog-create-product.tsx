@@ -45,7 +45,7 @@ export default function DialogCreateProduct({
 
     // Debug: Log FormData
     console.log("FormData entries:");
-    for (let [key, value] of formData.entries()) {
+    for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
 

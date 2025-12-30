@@ -69,7 +69,7 @@ export default function UserManagement() {
         user.name,
         user.role,
         <DropdownAction
-          menu={[
+          product={[
             {
               label: (
                 <span className="flex item-center gap-2">
