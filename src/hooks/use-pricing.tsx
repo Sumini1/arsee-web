@@ -5,13 +5,14 @@ export function usePricing(
   orderProduct: {
     products: Product;
     quantity: number;
+    nominal: number;
   }[]
 ) {
   const totalPrice = useMemo(() => {
     let total = 0;
 
     orderProduct.forEach((item) => {
-      total += item.products.price * item.quantity;
+      total += item.nominal;
     });
 
     return total;

@@ -55,7 +55,7 @@ export default function AppSidebar() {
       </SidebarHeader>
 
       {/* Content */}
-      <SidebarContent>
+      <SidebarContent suppressHydrationWarning>
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-2">
             <SidebarMenu>

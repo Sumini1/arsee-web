@@ -15,7 +15,6 @@ import { Product } from "@/validations/product-validation";
 import { addOrderItem } from "../../../actions";
 import { INITIAL_STATE_ACTION } from "@/constants/general-constant";
 
-
 export default function AddOrderItem({ id }: { id: string }) {
   const supabase = createClient();
   const {
@@ -77,6 +76,8 @@ export default function AddOrderItem({ id }: { id: string }) {
     action: "increment" | "decrement"
   ) => {
     const existingItem = carts.find((item) => item.product_id === product.id);
+    const priceAfterDiscount =
+      product.price - product.price * ((product.discount || 0) / 100);
     if (existingItem) {
       if (action === "decrement") {
         if (existingItem.quantity > 1) {
@@ -86,7 +87,7 @@ export default function AddOrderItem({ id }: { id: string }) {
                 ? {
                     ...item,
                     quantity: item.quantity - 1,
-                    total: item.total - product.price,
+                    nominal: item.nominal - priceAfterDiscount,
                   }
                 : item
             )
@@ -101,7 +102,7 @@ export default function AddOrderItem({ id }: { id: string }) {
               ? {
                   ...item,
                   quantity: item.quantity + 1,
-                  total: item.total + product.price,
+                  nominal: item.nominal + priceAfterDiscount,
                 }
               : item
           )
@@ -113,14 +114,13 @@ export default function AddOrderItem({ id }: { id: string }) {
         {
           product_id: product.id,
           quantity: 1,
-          total: product.price,
+          nominal: priceAfterDiscount,
           notes: "",
           product,
         },
       ]);
     }
   };
-
 
   const [addOrderItemState, addOrderItemAction, isPendingAddOrderItem] =
     useActionState(addOrderItem, INITIAL_STATE_ACTION);
@@ -183,7 +183,7 @@ export default function AddOrderItem({ id }: { id: string }) {
       </div>
 
       <div className="lg:w-1/3">
-                <CartSection
+        <CartSection
           order={order}
           carts={carts}
           setCarts={setCarts}
@@ -191,7 +191,6 @@ export default function AddOrderItem({ id }: { id: string }) {
           isLoading={isPendingAddOrderItem}
           onOrder={handleOrder}
         />
-
       </div>
     </div>
   );

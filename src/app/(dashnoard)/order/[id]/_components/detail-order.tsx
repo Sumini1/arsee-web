@@ -24,6 +24,7 @@ import { INITIAL_STATE_ACTION } from "@/constants/general-constant";
 import { updateStatusOrderItem } from "../../actions";
 import { useAuthStore } from "@/stores/auth-store";
 import { createClientSupabase } from "@/lib/supabase/default";
+import Receipt from "./receipt";
 
 export default function DetailOrder({ id }: { id: string }) {
   const supabase = createClientSupabase();
@@ -37,7 +38,9 @@ export default function DetailOrder({ id }: { id: string }) {
     queryFn: async () => {
       const result = await supabase
         .from("orders")
-        .select("id, customer_name, status, payment_token, tables (name, id)")
+        .select(
+          "id, customer_name, status, payment_token, tables (name, id), created_at"
+        )
         .eq("order_id", id)
         .single();
 
@@ -53,22 +56,25 @@ export default function DetailOrder({ id }: { id: string }) {
 
   useEffect(() => {
     if (!order?.id) return;
-    const channel = supabase.channel("change-order").on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "orders_products",
-        filter: `order_id=eq.${order.id}`,
-      },
-      () => {
-        refetchOrderProduct();
-      }
-    ).subscribe();
+    const channel = supabase
+      .channel("change-order")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders_products",
+          filter: `order_id=eq.${order.id}`,
+        },
+        () => {
+          refetchOrderProduct();
+        }
+      )
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
+      supabase.removeChannel(channel);
+    };
   }, [order?.id]);
 
   const {
@@ -121,7 +127,6 @@ export default function DetailOrder({ id }: { id: string }) {
 
     if (updateStatusOrderState?.status === "success") {
       toast.success("Update Order Success");
-     
     }
   }, [updateStatusOrderState]);
 
@@ -144,7 +149,7 @@ export default function DetailOrder({ id }: { id: string }) {
             </span>
           </div>
         </div>,
-        <div>{convertIDR(item.products.price * item.quantity)}</div>,
+        <div>{convertIDR(item.nominal)}</div>,
         <div
           className={cn("px-2 py-1 rounded-full text-white w-fit capitalize", {
             "bg-gray-500": item.status === "pending",
@@ -204,10 +209,18 @@ export default function DetailOrder({ id }: { id: string }) {
     <div className="w-full space-y-4 ">
       <div className="flex  items-center justify-between w-full gap-4">
         <h1 className="text-2xl font-bold">Detail Order</h1>
-        {profile.role !== "seller" && (
+        {profile.role !== "seller" && order?.status === "process" && (
           <Link href={`/order/${id}/add`}>
             <Button>Add Order Item</Button>
           </Link>
+        )}
+
+        {order?.status === "settled" && (
+          <Receipt
+            order={order}
+            orderProduct={orderProduct?.data}
+            orderId={id}
+          />
         )}
       </div>
       <div className="flex flex-col lg:flex-row gap-4 w-full ">

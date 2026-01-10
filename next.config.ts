@@ -6,17 +6,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  devIndicators: false,
   images: {
-    domains: [
-      "https://evakamnhfwqyakzckcpx.storage.supabase.co",
-      "https://evakamnhfwqyakzckcpx.supabase.co",
-    ],
-
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "evakamnhfwqyakzckcpx.storagesupabase.co",
+        hostname: "evakamnhfwqyakzckcpx.storage.supabase.co", // Fixed typo
         port: "",
         pathname: "/**",
       },

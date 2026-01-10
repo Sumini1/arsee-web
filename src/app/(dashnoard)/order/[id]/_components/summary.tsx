@@ -22,9 +22,10 @@ export default function Summary({
     customer_name: string;
     tables: { name: string }[];
     status: string;
+    payment_token?: string;
   };
   orderProduct:
-    | { products: Product; quantity: number; status: string }[]
+    | { products: Product; quantity: number; status: string; nominal: number }[]
     | null
     | undefined;
   id: string;
@@ -46,13 +47,17 @@ export default function Summary({
   ] = useActionState(generatePayment, INITIAL_STATE_GENERATE_PAYMENT);
 
   const handleGeneratePayment = () => {
-    const formData = new FormData();
-    formData.append("id", id || "");
-    formData.append("gross_amount", grandTotal.toString());
-    formData.append("customer_name", order?.customer_name || "");
-    startTransition(() => {
-      generatePaymentAction(formData);
-    });
+    if (order?.payment_token) {
+      window.snap.pay(order.payment_token);
+    } else {
+      const formData = new FormData();
+      formData.append("id", id || "");
+      formData.append("gross_amount", grandTotal.toString());
+      formData.append("customer_name", order?.customer_name || "");
+      startTransition(() => {
+        generatePaymentAction(formData);
+      });
+    }
   };
 
   useEffect(() => {
@@ -79,7 +84,10 @@ export default function Summary({
             <div className="space-y-2">
               <Label>Table</Label>
               <Input
-                value={(order?.tables as unknown as { name: string })?.name}
+                value={
+                  (order?.tables as unknown as { name: string })?.name ||
+                  "Take Away"
+                }
                 disabled
               />
             </div>
@@ -109,7 +117,11 @@ export default function Summary({
             <Button
               type="submit"
               onClick={handleGeneratePayment}
-              disabled={!isAllServed || isPendingGeneratePayment}
+              disabled={
+                !isAllServed ||
+                isPendingGeneratePayment ||
+                orderProduct?.length === 0
+              }
               className="w-full font-semibold bg-pink-500 hover:bg-pink-600 text-white cursor-pointer"
             >
               {isPendingGeneratePayment ? (

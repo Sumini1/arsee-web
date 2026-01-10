@@ -15,6 +15,19 @@ export const INITIAL_ORDER = {
   status: "",
 };
 
+export const INITIAL_ORDER_TAKEAWAY = {
+  customer_name: "",
+};
+
+export const INITIAL_STATE_ORDER_TAKEAWAY = {
+  status: "idle",
+  errors: {
+    customer_name: [],
+    _form: [],
+  },
+};
+
+
 export const INITIAL_STATE_ORDER = {
   status: "idle",
   errors: {
@@ -28,7 +41,7 @@ export const INITIAL_STATE_ORDER = {
 export const STATUS_CREATE_ORDER = [
   {
     value: "reserved",
-    label: "Pending",
+    label: "Reserved",
   },
   {
     value: "process",
